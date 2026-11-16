@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizMaster — Horticulture Examination</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ========== HOME SCREEN ========== -->
+<section id="home-screen" class="screen active">
+    <div class="home-container">
+        <div class="hero">
+            <div class="logo">
+                <span class="logo-icon">🌿</span>
+                <h1>QuizMaster</h1>
+            </div>
+            <p class="tagline">Official 500 Horticulture MCQ Examination Portal</p>
+            <p class="sub-tagline">Comprehensive CUET PG / Competitive Agriculture preparation featuring all 4 official sections.</p>
+        </div>
+
+        <div class="card name-card">
+            <label for="player-name">Candidate Name</label>
+            <input type="text" id="player-name" placeholder="Enter your full name to start..." maxlength="40" autocomplete="off">
+            <p class="hint" id="name-error"></p>
+        </div>
+
+        <div class="card subjects-card" id="subjects-section" style="display:none;">
+            <h2>Select Subject to Attempt</h2>
+            <div class="subjects-grid">
+                <button class="subject-btn" data-subject="horticulture" onclick="startQuiz('horticulture')">
+                    <div class="subject-btn-header">
+                        <span class="subject-icon">🌱</span>
+                        <div>
+                            <span class="subject-name">Horticulture</span>
+                            <span class="subject-tag">Official 500 Question Bank (CUET PG Standard)</span>
+                        </div>
+                    </div>
+                    <div class="subject-meta-tags">
+                        <span class="meta-pill">⏱️ 60 Minutes</span>
+                        <span class="meta-pill">📋 60 Questions</span>
+                        <span class="meta-pill">🔀 500 Questions Pool</span>
+                    </div>
+                    <div class="subject-types-preview">
+                        <span>All 4 Exam Sections:</span>
+                        <span class="type-pill">🔤 Section A: One-Word (150)</span>
+                        <span class="type-pill">⚖️ Section B: Assertion & Reason (100)</span>
+                        <span class="type-pill">❓ Section C: True / False & Statements (150)</span>
+                        <span class="type-pill">🔗 Section D: Match the Following (100)</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== QUIZ SCREEN ========== -->
+<section id="quiz-screen" class="screen">
+    <header class="quiz-header">
+        <div class="quiz-header-left">
+            <span class="quiz-subject-badge" id="quiz-subject-badge">Horticulture</span>
+            <span class="quiz-player" id="quiz-player-name"></span>
+        </div>
+        <div class="quiz-header-center">
+            <div class="timer" id="timer">
+                <span class="timer-icon">⏱️</span>
+                <span id="timer-display">60:00</span>
+            </div>
+        </div>
+        <div class="quiz-header-right">
+            <span class="progress-text"><span id="answered-count">0</span> / 60 answered</span>
+            <button class="btn btn-submit" onclick="confirmSubmit()">Submit Quiz</button>
+        </div>
+    </header>
+
+    <div class="quiz-body">
+        <div class="question-panel">
+            <div class="question-top">
+                <span class="q-number" id="q-number">Question 1 of 60</span>
+                <div class="q-badges">
+                    <span class="q-type-badge" id="q-type-badge">One-Word Answer</span>
+                    <span class="q-category" id="q-category">Category</span>
+                </div>
+            </div>
+
+            <div class="question-content-box">
+                <div class="question-text" id="question-text"></div>
+            </div>
+
+            <div class="options-list" id="options-list">
+                <!-- Options rendered dynamically -->
+            </div>
+
+            <div class="question-nav">
+                <button class="btn btn-nav" id="btn-prev" onclick="navigateQuestion(-1)">← Previous</button>
+                <span class="nav-hint">Click an option to lock your answer</span>
+                <button class="btn btn-nav" id="btn-next" onclick="navigateQuestion(1)">Next →</button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Question Navigator</h3>
+                <span class="sidebar-sub">Click any question number to jump</span>
+            </div>
+            <div class="q-grid" id="q-grid">
+                <!-- 60 numbered buttons rendered by JS -->
+            </div>
+            <div class="legend">
+                <span class="legend-item"><span class="dot dot-current"></span> Current</span>
+                <span class="legend-item"><span class="dot dot-answered"></span> Locked/Answered</span>
+                <span class="legend-item"><span class="dot dot-unanswered"></span> Unanswered</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Confirmation Modal -->
+    <div class="modal-overlay" id="submit-modal" style="display:none;">
+        <div class="modal">
+            <div class="modal-icon">⚠️</div>
+            <h3>Submit Quiz Early?</h3>
+            <p id="submit-modal-text">You have answered 0 out of 60 questions.</p>
+            <p class="modal-warn">Once submitted, your answers will be evaluated against the official answer key.</p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal()">Continue Quiz</button>
+                <button class="btn btn-confirm" onclick="submitQuiz()">Confirm & Evaluate</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== RESULTS SCREEN ========== -->
+<section id="results-screen" class="screen">
+    <div class="results-container">
+        <div class="results-hero">
+            <div class="results-badge">Evaluation Complete</div>
+            <h1>Performance Analysis</h1>
+            <p class="results-player" id="results-player"></p>
+            <p class="results-subject" id="results-subject"></p>
+            <p class="results-time" id="results-time"></p>
+        </div>
+
+        <div class="score-cards">
+            <div class="score-card score-total">
+                <span class="score-label">Overall Score</span>
+                <span class="score-value" id="score-value">0/60</span>
+                <span class="score-percent" id="score-percent">0%</span>
+            </div>
+            <div class="score-card score-correct">
+                <span class="score-label">Correct</span>
+                <span class="score-value" id="correct-count">0</span>
+                <span class="score-sub">Accurate answers</span>
+            </div>
+            <div class="score-card score-wrong">
+                <span class="score-label">Incorrect</span>
+                <span class="score-value" id="wrong-count">0</span>
+                <span class="score-sub">Needs revision</span>
+            </div>
+            <div class="score-card score-skipped">
+                <span class="score-label">Unanswered</span>
+                <span class="score-value" id="skipped-count">0</span>
+                <span class="score-sub">Left blank</span>
+            </div>
+        </div>
+
+        <!-- Analytical Graphs -->
+        <div class="charts-section">
+            <div class="charts-grid-top">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Performance by Exam Section</h3>
+                        <span class="chart-sub">Section A (One-Word), B (A&R), C (Statements), D (Match)</span>
+                    </div>
+                    <canvas id="typeChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Performance by Subject Domain</h3>
+                        <span class="chart-sub">Fruits, Vegetables, Floriculture, Post-Harvest, etc.</span>
+                    </div>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card chart-card-donut">
+                <div class="chart-header">
+                    <h3>Overall Accuracy Breakdown</h3>
+                    <span class="chart-sub">Proportion of correct, incorrect and skipped</span>
+                </div>
+                <div class="donut-wrapper">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Areas to Improve & Diagnostic Analysis -->
+        <div class="summary-card" id="summary-card">
+            <div class="summary-header">
+                <span class="summary-icon">📊</span>
+                <div>
+                    <h3>Diagnostic Analysis & Areas to Improve</h3>
+                    <p class="summary-desc">Actionable recommendations tailored to your performance across exam sections and subject domains.</p>
+                </div>
+            </div>
+            <div id="type-improvement-summary" class="improvement-block"></div>
+            <div id="subject-improvement-summary" class="improvement-block"></div>
+            <div id="overall-feedback-box" class="overall-message"></div>
+        </div>
+
+        <!-- Detailed Review with Multi-filtering -->
+        <div class="answers-section">
+            <div class="answers-section-header">
+                <div>
+                    <h3>Detailed Question Review</h3>
+                    <p class="answers-sub">Review every question with your selected choice, correct answer, and thorough explanation.</p>
+                </div>
+            </div>
+
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <span class="filter-label">Status:</span>
+                    <button class="filter-btn active" onclick="setStatusFilter('all', this)">All (60)</button>
+                    <button class="filter-btn" onclick="setStatusFilter('correct', this)">✅ Correct (<span id="filter-cnt-correct">0</span>)</button>
+                    <button class="filter-btn" onclick="setStatusFilter('wrong', this)">❌ Incorrect (<span id="filter-cnt-wrong">0</span>)</button>
+                    <button class="filter-btn" onclick="setStatusFilter('skipped', this)">⬜ Unanswered (<span id="filter-cnt-skipped">0</span>)</button>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Section:</span>
+                    <button class="filter-btn-type active" onclick="setTypeFilter('all', this)">All Sections</button>
+                    <button class="filter-btn-type" onclick="setTypeFilter('One-Word Answer', this)">🔤 Section A: One-Word</button>
+                    <button class="filter-btn-type" onclick="setTypeFilter('Assertion & Reasoning', this)">⚖️ Section B: A&R</button>
+                    <button class="filter-btn-type" onclick="setTypeFilter('True or False Statements', this)">❓ Section C: Statements</button>
+                    <button class="filter-btn-type" onclick="setTypeFilter('Match the Following', this)">🔗 Section D: Match</button>
+                </div>
+            </div>
+
+            <div id="answers-list" class="answers-list">
+                <!-- Answer items dynamically rendered -->
+            </div>
+        </div>
+
+        <div class="results-actions">
+            <button class="btn btn-primary" onclick="retakeQuiz()">🔄 Attempt Another Randomized 60-Question Quiz</button>
+            <button class="btn btn-secondary" onclick="goHome()">🏠 Back to Home</button>
+        </div>
+    </div>
+</section>
+
+<script src="questions.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
